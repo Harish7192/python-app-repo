@@ -1,0 +1,30 @@
+# Updated cloudbuild.yaml
+steps:
+  # Step 1: Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'build', 
+      '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA', 
+      '.'
+    ]
+
+  # Step 2: Push the built image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [
+      'push', 
+      'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA'
+    ]
+
+  # Step 3: Deploy/Update the VM by updating its metadata with the new image tag
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'compute'
+      - 'instances'
+      - 'add-metadata'
+      - 'bu-hands-on'
+      - '--zone=us-central1-a'
+      - '--metadata=deployed-image=us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA'
+
+images:
+  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA'
