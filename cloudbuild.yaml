@@ -1,11 +1,11 @@
 steps:
-  # 1. Build using a static tag (:v1) instead of $BUILD_ID
+  # 1. Build using a static tag (:$BUILD_ID) instead of $BUILD_ID
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:v1', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID', '.']
 
   # 2. Push it over the old one
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:v1']
+    args: ['push', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID']
 
   # 3. No pulling required! Just reset the VM so it auto-refreshes
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -13,7 +13,7 @@ steps:
     args: ['compute', 'instances', 'reset', 'bu-hands-on', '--zone=us-central1-a']
 
 images:
-  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:v1'
+  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID'
 
 options:
   logging: CLOUD_LOGGING_ONLY
