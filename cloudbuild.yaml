@@ -1,31 +1,19 @@
 steps:
-  # 1. Build using the dynamic Build ID
+  # 1. Build using the static :latest tag
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:latest', '.']
 
-  # 2. Push it to Artifact Registry
+  # 2. Push it over the old one
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID']
+    args: ['push', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:latest']
 
-  # 3. SSH into the VM using IAP tunneling
+  # 3. Reset the VM to trigger our newly saved startup script
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        gcloud compute ssh bu-hands-on \
-          --zone=us-central1-a \
-          --tunnel-through-iap \
-          --command="
-            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet && \
-            docker pull us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID && \
-            (docker stop my-running-app || true) && \
-            (docker rm my-running-app || true) && \
-            docker run -d --name my-running-app -p 80:80 us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID
-          "
+    entrypoint: 'gcloud'
+    args: ['compute', 'instances', 'reset', 'bu-hands-on', '--zone=us-central1-a']
 
 images:
-  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID'
+  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:latest'
 
 options:
   logging: CLOUD_LOGGING_ONLY
