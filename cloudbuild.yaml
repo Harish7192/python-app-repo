@@ -7,10 +7,15 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:latest']
 
-  # 3. Reset the VM to trigger our newly saved startup script
+  # 3. Stop the instance cleanly
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: 'gcloud'
-    args: ['compute', 'instances', 'reset', 'bu-hands-on', '--zone=us-central1-a']
+    args: ['compute', 'instances', 'stop', 'bu-hands-on', '--zone=us-central1-a']
+
+  # 4. Start the instance back up (This guarantees the startup script runs!)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args: ['compute', 'instances', 'start', 'bu-hands-on', '--zone=us-central1-a']
 
 images:
   - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:latest'
