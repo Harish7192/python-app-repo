@@ -1,19 +1,35 @@
 steps:
-  # 1. Build using a static tag (:$BUILD_ID) instead of $BUILD_ID
+  # 1. Build using the dynamic Build ID
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID', '.']
 
-  # 2. Push it over the old one
+  # 2. Push it to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID']
+    args: ['push', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID']
 
-  # 3. No pulling required! Just reset the VM so it auto-refreshes
+  # 3. SSH into the VM, pull the new tag, stop the old container, and run the new one
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
-    args: ['compute', 'instances', 'reset', 'bu-hands-on', '--zone=us-central1-a']
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud compute ssh bu-hands-on --zone=us-central1-a --command="
+          # 1. Authenticate docker with Artifact Registry inside the VM (if not already done globally)
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+          # 2. Pull the specific new image
+          docker pull us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID
+
+          # 3. Stop and remove the old running container (assuming it is named 'my-running-app')
+          docker stop my-running-app || true
+          docker rm my-running-app || true
+
+          # 4. Run the new container
+          docker run -d --name my-running-app -p 80:80 us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID
+        "
 
 images:
-  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID'
+  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson-v2/my-app:$BUILD_ID'
 
 options:
   logging: CLOUD_LOGGING_ONLY
