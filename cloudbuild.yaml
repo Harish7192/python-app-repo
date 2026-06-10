@@ -4,7 +4,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build', 
-      '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA', 
+      '-t', 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID', 
       '.'
     ]
 
@@ -12,7 +12,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'push', 
-      'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA'
+      'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID'
     ]
 
   # Step 3: Deploy/Update the VM by updating its metadata with the new image tag
@@ -24,9 +24,9 @@ steps:
       - 'add-metadata'
       - 'bu-hands-on'
       - '--zone=us-central1-a'
-      - '--metadata=deployed-image=us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA'
+      - '--metadata=deployed-image=us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID'
 
 images:
-  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:$BUILD_ID'
 options:
   logging: CLOUD_LOGGING_ONLY
