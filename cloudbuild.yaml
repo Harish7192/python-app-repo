@@ -17,6 +17,7 @@ steps:
     entrypoint: 'gcloud'
     args: ['compute', 'instances', 'start', 'bu-hands-on', '--zone=us-central1-a']
 
+
 images:
   - 'us-central1-docker.pkg.dev/project-ee16ab9f-709f-4851-b92/cloud-handson/my-app:latest'
 
